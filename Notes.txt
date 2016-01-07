@@ -1,0 +1,42 @@
+Notes
+
+https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=United%20States&format=json
+
+var alice = cloudant.use('alice')
+alice.insert({ _id: 'myid', crazy: true }, function(err, body) {
+  if (!err)
+    console.log(body)
+})
+
+alice.get('rabbit', { revs_info: true }, function(err, body) {
+  if (!err)
+    console.log(body);
+});
+
+
+{
+  "_id": "0",
+  "_rev": "2-2810e885286dc475cf56a29d3cc65d88",
+  "title": "Sample",
+  "url": "Sample URL",
+  "sections": [
+    {
+      "text": "Sample Text A",
+      "concepts": [
+        "concept 1",
+        "concept 2"
+      ]
+    },
+    {
+      "text": "Sample Text B",
+      "concepts": [
+        "concept 3",
+        "concept 4"
+      ]
+    }
+  ]
+}
+
+1. Query using Search Indexes
+
+https://3697cd56-eee4-402c-811e-778ef76e00f3-bluemix.cloudant.com/articles/_design/articles/_search/titles?q=title:another&include_docs=true
