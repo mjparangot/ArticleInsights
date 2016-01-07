@@ -143,8 +143,6 @@ function createResponseData(id, name, value, attachments) {
 	return responseData;
 }
 
-
-
 var saveDocument = function(id, name, value, response) {
 	
 	if(id === undefined) {
