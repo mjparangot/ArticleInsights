@@ -434,6 +434,18 @@ app.get('/api/wiki/:title', function(req, res) {
 	  }
 	};
 
+	/*
+	-> wikipedia search api on title param
+	--> top result or redirect becomes new title param
+	---> cloudant query on title
+		if (doc exists) and (doc-request-count < x):
+	----> send doc from cloudant as JSON response
+		else:
+	----> wikipedia query api on title
+	-----> for each section in wiki response get concept insights
+	------> store/update doc and doc-request-count in cloudant and send as JSON response
+	 */
+
 	// Get wiki article and build doc
 	request(options, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
