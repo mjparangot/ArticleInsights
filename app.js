@@ -38,7 +38,7 @@ var wiki = require('./public/scripts/wiki.js');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/public/views');
 app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 app.use(logger('dev'));
@@ -409,20 +409,19 @@ app.get('/api/favorites', function(request, response) {
 });
 
 
-//// MY CODE
-///
+///////// MY CODE /////////////
 
-	/*
-	-> wikipedia search api on title param
-	--> top result or redirect becomes new title param
-	---> cloudant query on title
-		if (doc exists) and (doc-request-count < x):
-	----> send doc from cloudant as JSON response
-		else:
-	----> wikipedia query api on title
-	-----> for each section in wiki response get concept insights
-	------> store/update doc and doc-request-count in cloudant and send as JSON response
-	 */
+/*
+-> wikipedia search api on title param
+--> top result or redirect becomes new title param
+---> cloudant query on title
+	if (doc exists) and (doc-request-count < x):
+----> send doc from cloudant as JSON response
+	else:
+----> wikipedia query api on title
+-----> for each section in wiki response get concept insights
+------> store/update doc and doc-request-count in cloudant and send as JSON response
+ */
 
 // TODO: 
 // - refactor with encapsulation
