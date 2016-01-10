@@ -34,12 +34,7 @@ var multipartMiddleware = multipart();
 
 // My modules
 var request = require('request');
-var watson = require('watson-developer-cloud');
-
-var graph_id = '/graphs/wikipedia/en-latest';
-
-// Create the service wrapper
-var concept_insights = watson.concept_insights(ciCredentials);
+var wiki = require('./public/scripts/wiki.js');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -415,24 +410,7 @@ app.get('/api/favorites', function(request, response) {
 
 
 //// MY CODE
-
-// TODO: 
-// - refactor with encapsulation
-// - fix intro: get first two sentences properly
-// - Handle article disambiguation better
-app.get('/api/wiki/:title', function(req, res) {
-
-	db = cloudant.use(dbCredentials.dbArticles);
-
-	var title = req.params.title;
-	var url = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles='+title+'&format=json&redirects';
-
-	var options = {
-	  url: url,
-	  headers: {
-	    'Content-Type': 'application/json'
-	  }
-	};
+///
 
 	/*
 	-> wikipedia search api on title param
@@ -446,88 +424,24 @@ app.get('/api/wiki/:title', function(req, res) {
 	------> store/update doc and doc-request-count in cloudant and send as JSON response
 	 */
 
-	// Get wiki article and build doc
-	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-		  	var wiki = JSON.parse(body).query.pages;
-		  	var redirects = JSON.parse(body).query.redirects;
-		  	// check for title redirect
-		  	if (redirects != null) {
-		  		var title = redirects.to;
-				var url = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles='+title+'&format=json&redirects';
-				var options = {
-				  url: url,
-				  headers: {
-				    'Content-Type': 'application/json'
-				  }
-				};
-		  		request(options, function (error, response, body) {
-		  			wiki = JSON.parse(body).query.pages;
-		  		});
-		  	}
-		  	// only one key
-		  	for (var key in wiki) {
-		  		if (key === "-1") {
-		  			res.write("Article does not exist");
-		  			res.end();
-		  			return;
-		  		}
-		  		var article = wiki[key];
-		  		// TODO: Handle article disambiguation
-		  		var intro = article.extract.split('.')[0] + ".";
-		  		if (article.extract.split('.')[1] != null) {
-		  			intro += article.extract.split('.')[1] + ".";
-		  		}
-		  		var sections = [];
-		  		var split = article.extract.split("\n");
-		  		var sectionsLeft = split.length;
-		  		var i = 0;
-		  		// loop through sections to get their concept insights
-		  		while (i < split.length) {
-		  			if (split[i].charAt(0) != '^' && split[i] != "") {
-						(function(index, section) {
-							var params = { 
-								graph: graph_id,
-								text: section
-							};
-							// get concepts for section
-							concept_insights.graphs.annotateText(params, function(err, results) {
-								sectionsLeft -= 1;
-								if (err) {
-									console.log("error with concept insights");
-									console.log(err);
-									//return next(err);
-								}
-								else {
-									sections.splice(index, 0, {
-									//sections.push({
-										"text": section,
-										"concepts": results.annotations
-									});
-									// callback hell // done getting all concepts asynchronously
-									if (sectionsLeft === 0) {
-								  		//console.log(sections);
-								  		var response = {
-								  			"_id": article.pageid,
-								  			"title": article.title,
-								  			"intro": intro,
-								  			"sections": sections
-								  		};
-									    res.json(response);
-										res.end();	
-									}
-								}
-							});
-						})(i, split[i]);
-						i++;
-		  			}
-		  			else {
-		  				i++;
-		  				sectionsLeft--;
-		  			}
-		  		}
-		  	}
-		}
+// TODO: 
+// - refactor with encapsulation
+// - fix intro: get first two sentences properly
+// - Handle article disambiguation better
+app.get('/api/wiki/:title', function(req, res) {
+
+	db = cloudant.use(dbCredentials.dbArticles);
+	
+	wiki.getArticle(req.params.title, function(response) {
+		res.json(response);
+		res.end();
+	});
+});
+
+app.get('/api/search/:title', function(req, res) {
+	wiki.search(req.params.title, function(response) {
+		res.json(response);
+		res.end();
 	});
 });
 
