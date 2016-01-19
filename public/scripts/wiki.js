@@ -68,8 +68,9 @@ var wiki = {
 			  	// only one key
 			  	for (var key in wiki) {
 			  		if (key === "-1") {
-			  			res.write("Article does not exist");
-			  			res.end();
+			  			callback("Article does not exist");
+			  			//res.write("Article does not exist");
+			  			//res.end();
 			  			return;
 			  		}
 			  		var article = wiki[key];
